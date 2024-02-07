@@ -25,8 +25,11 @@ const createProduct = asyncHandler(async (req, res) => {
         negotiable,
         deliveryDays,
         description,
-        imagePath,
     } = req.body;
+
+    // Retrieve uploaded file path
+    const imagePaths = req.files.map(file => file.path);
+
     if (!category || !productTitle || !phoneNumber || !price
         || !deliveryOption || !location || !productBrand || !condition ||
     !negotiable || !deliveryDays || !description || !imagePath) {
@@ -47,6 +50,8 @@ const createProduct = asyncHandler(async (req, res) => {
         description,
         imagePath,
     })
+     // Save the product to the database
+     await product.save();
     res.status(201).json(product)
 });
 
@@ -93,6 +98,26 @@ const deleteProduct = asyncHandler(async (req, res) => {
     res.status(200).json(product)
 });
 
+//@desc Add product to cart
+//@route POST /api/v1/clutterswap/cart
+//@access public
+const addToCart = asyncHandler(async (req, res) => {
+    const { productId } = req.body;
+
+    // Retrieve product details from the database
+    const product = await Product.findById(productId);
+    if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Store the product ID in the user's session or in a database table dedicated to carts
+    // For simplicity, let's assume we're storing it in the user's session
+    req.session.cart = req.session.cart || [];
+    req.session.cart.push(productId);
+
+    res.status(200).json({ success: true, message: 'Product added to cart successfully' });
+});
+
 
 
 module.exports = {
@@ -100,5 +125,6 @@ module.exports = {
     createProduct,
     getProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    addToCart
 }
