@@ -33,8 +33,7 @@ const storage = multer.diskStorage({
 app.use(
     '/api/v1/clutterswap/users',
     multer({ storage: storage }).single('imageFile'),
-    require('./routes/userRoutes')
-);
+    require('./routes/userRoutes'));
 
 // Handling product-related routes
 app.use('/api/v1/clutterswap', require('./routes/productRoutes'));

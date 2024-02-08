@@ -13,6 +13,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const {
       email,
+      password,
       firstName,
       lastName,
       address,
@@ -22,9 +23,8 @@ const registerUser = asyncHandler(async (req, res) => {
       zipcode
   } = req.body;
 
-  console.log(body);
       
-    if (!email || firstName || lastName || address || phoneNumber || city || country || zipcode) {
+    if (!email || !password || !firstName || !lastName || !address || !phoneNumber || !city || !country || !zipcode) {
         res.status(400);
         throw new Error("All fields are mandatory");
     }
@@ -35,11 +35,11 @@ const registerUser = asyncHandler(async (req, res) => {
         
     }
     // //Hash password
-    // const hashedPassword = await bcrypt.hash(password, 10);
-    // console.log("Hasshed Password: ", hashedPassword);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // console.log("Hashed Password: ", hashedPassword);
     const user = await User.create({
-        email, firstName, lastName, address, phoneNumber, city, 
-        country,zipcode,
+        email, password:hashedPassword, firstName, lastName, address, phoneNumber, city, 
+        country,zipcode
     });
 
     console.log(`User created ${user}`);
@@ -67,7 +67,7 @@ const loginUser = asyncHandler(async (req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
         const accessToken = jwt.sign({
             user: {
-                username: user.username,
+                firstName: user.firstName,
                 email: user.email,
                 id: user.id,
             },
